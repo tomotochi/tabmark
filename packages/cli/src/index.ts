@@ -6,12 +6,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import Papa from 'papaparse';
 
+// Read version from package.json
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
+);
+
 const program = new Command();
 
 program
   .name('tabmark')
   .description('Convert between Markdown and CSV')
-  .version('1.0.0')
+  .version(packageJson.version)
   .argument('<input>', 'Input file path')
   .option('-o, --output <output>', 'Output file path')
   .action((inputPath: string, options: { output?: string }) => {

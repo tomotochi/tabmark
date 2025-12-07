@@ -1,6 +1,7 @@
 {
   "name": "tabmark-cli",
   "version": "0.1.0",
+  "description": "CLI tool for converting between Markdown and CSV using Tabmark hierarchical format",
   "main": "dist/index.js",
   "bin": {
     "tabmark": "./dist/index.js"
@@ -8,9 +9,18 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "markdown",
+    "csv",
+    "converter",
+    "tabmark",
+    "cli",
+    "hierarchical",
+    "data"
+  ],
   "author": "tomo_tochi",
   "license": "MIT",
   "repository": {
