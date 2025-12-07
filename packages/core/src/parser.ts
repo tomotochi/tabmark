@@ -6,8 +6,20 @@
 import MarkdownIt from 'markdown-it';
 import * as yaml from 'js-yaml';
 import Papa from 'papaparse';
-import { Frontmatter, GridData, ParsedMarkdown, ParserOptions } from './types';
-import { escapeHtml, escapeMarkdownSyntax, unescapeHtml, unescapeMarkdownSyntax, escapeHtmlSafe } from './escaper';
+import {
+  Frontmatter,
+  GridData,
+  ParsedMarkdown,
+  ParserOptions,
+  TabmarkValidationResult,
+} from './types';
+import {
+  escapeHtml,
+  escapeMarkdownSyntax,
+  unescapeHtml,
+  unescapeMarkdownSyntax,
+  escapeHtmlSafe,
+} from './escaper';
 
 export class MarkdownParser {
   private md: MarkdownIt;
@@ -385,8 +397,12 @@ export class MarkdownParser {
 
     // Build a map of code fence ranges (start line -> end line)
     const codeFenceRanges: Array<{ start: number; end: number }> = [];
-    const inlineCodeRanges: Array<{ start: number; end: number; startCol: number; endCol: number }> =
-      [];
+    const inlineCodeRanges: Array<{
+      start: number;
+      end: number;
+      startCol: number;
+      endCol: number;
+    }> = [];
 
     // Identify code fence tokens
     for (const token of tokens) {
@@ -591,5 +607,57 @@ export class MarkdownParser {
   toCSV(gridData: GridData): string {
     const data = [gridData.headers, ...gridData.rows];
     return Papa.unparse(data);
+  }
+
+  /**
+   * Validate if parsed markdown has valid Tabmark structure
+   * Checks:
+   * 1. At least one H1 heading exists (sheet name)
+   * 2. At least one H2 heading exists with numeric content (row number)
+   * 3. At least one H3 heading exists (column name)
+   */
+  validateTabmarkStructure(parsed: ParsedMarkdown): TabmarkValidationResult {
+    const errors: string[] = [];
+
+    // Check if at least one sheet (H1) exists
+    const sheetNames = Object.keys(parsed.sheets);
+    if (sheetNames.length === 0) {
+      errors.push('No H1 heading found. At least one sheet name is required.');
+      return { isValid: false, errors };
+    }
+
+    // Check each sheet for valid structure
+    for (const sheetName of sheetNames) {
+      const sheet = parsed.sheets[sheetName];
+
+      // Check if at least one row (H2) exists
+      const rowKeys = Object.keys(sheet.rows);
+      if (rowKeys.length === 0) {
+        errors.push(
+          `Sheet "${sheetName}": No H2 headings found. At least one row number is required.`,
+        );
+        continue;
+      }
+
+      // Check if at least one H2 is numeric
+      const hasNumericRow = rowKeys.some((key) => /^\d+$/.test(key.trim()));
+      if (!hasNumericRow) {
+        errors.push(
+          `Sheet "${sheetName}": No numeric H2 headings found. Row numbers must be numeric.`,
+        );
+      }
+
+      // Check if at least one column (H3) exists
+      if (sheet.columnOrder.length === 0) {
+        errors.push(
+          `Sheet "${sheetName}": No H3 headings found. At least one column name is required.`,
+        );
+      }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
   }
 }

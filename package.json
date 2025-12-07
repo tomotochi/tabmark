@@ -3,7 +3,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomotochi/tabmark.git"
+    "url": "git+https://github.com/tomotochi/tabmark.git"
   },
   "homepage": "https://github.com/tomotochi/tabmark#readme",
   "bugs": {
@@ -18,7 +18,7 @@
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
-    "format": "prettier --write \"**/*.{ts,js,json,md,svelte,yml,yaml}\""
+    "format": "prettier --write \"**/*.{ts,js,json,svelte,yml,yaml}\""
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

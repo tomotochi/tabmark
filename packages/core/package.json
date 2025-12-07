@@ -20,7 +20,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomotochi/tabmark.git",
+    "url": "git+https://github.com/tomotochi/tabmark.git",
     "directory": "packages/core"
   },
   "homepage": "https://github.com/tomotochi/tabmark/tree/main/packages/core#readme",

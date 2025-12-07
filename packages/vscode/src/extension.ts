@@ -186,21 +186,20 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
 
       try {
         const parsed = this.parser.parseHierarchical(text);
-        let gridData = this.parser.toGridData(parsed);
 
         // Auto-initialize empty files with 1x1 grid
-        if (gridData.headers.length === 0 && gridData.rows.length === 0 && text.trim() === '') {
-          gridData = {
+        if (text.trim() === '') {
+          const gridData = {
             headers: ['Column 1'],
             rows: [['']],
           };
           // Create initial markdown content
           const sheetName = 'Sheet1';
           const initialMarkdown = this.parser.fromGridData(sheetName, gridData);
-          
+
           // Set flag to prevent infinite loop
           isProgrammaticUpdate = true;
-          
+
           const edit = new vscode.WorkspaceEdit();
           const fullRange = new vscode.Range(
             document.positionAt(0),
@@ -208,11 +207,25 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
           );
           edit.replace(document.uri, fullRange, initialMarkdown);
           await vscode.workspace.applyEdit(edit);
-          
+
           // Don't send update message here - let the document change event handle it
           return;
         }
 
+        // Validate Tabmark structure
+        const validationResult = this.parser.validateTabmarkStructure(parsed);
+
+        if (!validationResult.isValid) {
+          // Show guide screen for invalid structure
+          webviewPanel.webview.postMessage({
+            type: 'showGuide',
+            errors: validationResult.errors,
+          });
+          return;
+        }
+
+        // Valid structure - show grid
+        const gridData = this.parser.toGridData(parsed);
         webviewPanel.webview.postMessage({
           type: 'update',
           data: gridData,
@@ -263,6 +276,32 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
           await this.handleGridUpdate(document, message.data, {
             value: isProgrammaticUpdate,
           });
+          break;
+        case 'initializeGrid':
+          // Initialize with 1x1 grid
+          const gridData = {
+            headers: ['Column 1'],
+            rows: [['']],
+          };
+          const sheetName = 'Sheet1';
+          const initialMarkdown = this.parser.fromGridData(sheetName, gridData);
+
+          isProgrammaticUpdate = true;
+          const edit = new vscode.WorkspaceEdit();
+          const fullRange = new vscode.Range(
+            document.positionAt(0),
+            document.positionAt(document.getText().length),
+          );
+          edit.replace(document.uri, fullRange, initialMarkdown);
+          await vscode.workspace.applyEdit(edit);
+          break;
+        case 'triggerImportCSV':
+          // Trigger the Import CSV command
+          await vscode.commands.executeCommand('tabmark.importCSV');
+          break;
+        case 'openWithOtherEditor':
+          // Trigger VS Code's "Open With..." command
+          await vscode.commands.executeCommand('vscode.openWith', document.uri);
           break;
       }
     });

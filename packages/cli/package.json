@@ -4,7 +4,7 @@
   "description": "CLI tool for converting between Markdown and CSV using Tabmark hierarchical format",
   "main": "dist/index.js",
   "bin": {
-    "tabmark": "./dist/index.js"
+    "tabmark": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -25,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomotochi/tabmark.git",
+    "url": "git+https://github.com/tomotochi/tabmark.git",
     "directory": "packages/cli"
   },
   "homepage": "https://github.com/tomotochi/tabmark/tree/main/packages/cli#readme",

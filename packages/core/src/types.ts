@@ -24,3 +24,8 @@ export interface ParserOptions {
   escapeHtml?: boolean; // Default: true (XSS prevention)
   escapeMarkdown?: boolean; // Default: false (preserve formatting)
 }
+
+export interface TabmarkValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
