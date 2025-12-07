@@ -1,0 +1,47 @@
+# Source files
+src/**
+webview/src/**
+webview/tsconfig.json
+webview/vite.config.ts
+tsconfig.json
+vite.config.js
+esbuild.cjs
+
+# Tests
+tests/**
+**/*.test.ts
+**/*.test.js
+**/test-*.js
+**/test-*.js.map
+
+# Sample files
+sample/**
+
+# Assets (exclude all except the main icon)
+assets/**
+!assets/tabmark.png
+
+# Build artifacts
+*.tsbuildinfo
+.vscode-test/**
+
+# Source maps (optional - remove if you want debugging support)
+**/*.js.map
+
+# Development files
+.eslintrc.js
+.prettierrc
+.gitignore
+.vscode/**
+
+# Documentation (keep only README.md for Marketplace)
+README.ja.md
+docs/**
+
+# Exclude node_modules since extension is bundled with esbuild
+node_modules/**
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*

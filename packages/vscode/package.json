@@ -1,0 +1,98 @@
+{
+  "name": "tabmark-vscode",
+  "private": true,
+  "displayName": "Tabmark",
+  "description": "Edit Markdown files as DataGrid",
+  "version": "0.1.0",
+  "publisher": "tomo-tochi",
+  "author": "tomo_tochi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tomo_tochi/tabmark.git",
+    "directory": "packages/vscode"
+  },
+  "homepage": "https://github.com/tomo_tochi/tabmark/tree/main/packages/vscode#readme",
+  "bugs": {
+    "url": "https://github.com/tomo_tochi/tabmark/issues"
+  },
+  "icon": "assets/tabmark.png",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "tabmark.datagrid",
+        "displayName": "Tabmark DataGrid",
+        "selector": [
+          {
+            "filenamePattern": "*.table.md"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "tabmark.openDataGrid",
+        "title": "Open as DataGrid",
+        "icon": "$(table)"
+      },
+      {
+        "command": "tabmark.exportCSV",
+        "title": "Export to CSV",
+        "category": "Tabmark"
+      },
+      {
+        "command": "tabmark.importCSV",
+        "title": "Import from CSV",
+        "category": "Tabmark"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "tabmark.openDataGrid",
+          "when": "resourceExtname == .md && resourceFilename =~ /\\.table\\.md$/",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "build": "npm run package",
+    "compile": "node esbuild.cjs",
+    "watch": "node esbuild.cjs --watch",
+    "package": "node esbuild.cjs --production && npm run build:webview",
+    "vsce:package": "vsce package --no-dependencies",
+    "build:webview": "vite build",
+    "watch:webview": "vite build --watch",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.0.0",
+    "@types/papaparse": "^5.5.0",
+    "@types/vscode": "^1.90.0",
+    "esbuild": "^0.19.12",
+    "svelte": "^5.0.0",
+    "typescript": "^5.1.3",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "markdown-it": "^14.0.0",
+    "papaparse": "^5.5.3",
+    "tabmark-core": "^0.1.0"
+  }
+}
