@@ -300,8 +300,8 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
           await vscode.commands.executeCommand('tabmark.importCSV');
           break;
         case 'openWithOtherEditor':
-          // Trigger VS Code's "Open With..." command
-          await vscode.commands.executeCommand('vscode.openWith', document.uri);
+          // Close the current webview and reopen with editor picker
+          await vscode.commands.executeCommand('workbench.action.reopenWithEditor');
           break;
       }
     });
