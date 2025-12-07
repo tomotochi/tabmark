@@ -35,4 +35,4 @@ jobs:
           npm run build --workspaces --if-present
 
       - name: Test
-        run: npm test --workspaces -- run
+        run: npm test --workspaces
