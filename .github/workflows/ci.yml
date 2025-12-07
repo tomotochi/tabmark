@@ -30,7 +30,9 @@ jobs:
         run: npm run lint
 
       - name: Build
-        run: npm run build
+        run: |
+          npm run build --workspace=packages/core
+          npm run build --workspaces --if-present
 
       - name: Test
         run: npm test --workspaces -- run
