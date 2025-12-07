@@ -3,11 +3,11 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomo_tochi/tabmark.git"
+    "url": "https://github.com/tomotochi/tabmark.git"
   },
-  "homepage": "https://github.com/tomo_tochi/tabmark#readme",
+  "homepage": "https://github.com/tomotochi/tabmark#readme",
   "bugs": {
-    "url": "https://github.com/tomo_tochi/tabmark/issues"
+    "url": "https://github.com/tomotochi/tabmark/issues"
   },
   "author": "tomo_tochi",
   "license": "MIT",

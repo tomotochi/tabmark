@@ -9,12 +9,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomo_tochi/tabmark.git",
+    "url": "https://github.com/tomotochi/tabmark.git",
     "directory": "packages/vscode"
   },
-  "homepage": "https://github.com/tomo_tochi/tabmark/tree/main/packages/vscode#readme",
+  "homepage": "https://github.com/tomotochi/tabmark/tree/main/packages/vscode#readme",
   "bugs": {
-    "url": "https://github.com/tomo_tochi/tabmark/issues"
+    "url": "https://github.com/tomotochi/tabmark/issues"
   },
   "icon": "assets/tabmark.png",
   "engines": {
