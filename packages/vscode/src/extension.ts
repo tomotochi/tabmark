@@ -277,7 +277,7 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
             value: isProgrammaticUpdate,
           });
           break;
-        case 'initializeGrid':
+        case 'initializeGrid': {
           // Initialize with 1x1 grid
           const gridData = {
             headers: ['Column 1'],
@@ -285,7 +285,7 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
           };
           const sheetName = 'Sheet1';
           const initialMarkdown = this.parser.fromGridData(sheetName, gridData);
-
+          
           isProgrammaticUpdate = true;
           const edit = new vscode.WorkspaceEdit();
           const fullRange = new vscode.Range(
@@ -295,6 +295,7 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
           edit.replace(document.uri, fullRange, initialMarkdown);
           await vscode.workspace.applyEdit(edit);
           break;
+        }
         case 'triggerImportCSV':
           // Trigger the Import CSV command
           await vscode.commands.executeCommand('tabmark.importCSV');

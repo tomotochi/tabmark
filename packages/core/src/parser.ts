@@ -14,7 +14,6 @@ import {
   TabmarkValidationResult,
 } from './types';
 import {
-  escapeHtml,
   escapeMarkdownSyntax,
   unescapeHtml,
   unescapeMarkdownSyntax,
