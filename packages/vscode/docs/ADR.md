@@ -289,6 +289,31 @@ Markdownの表形式データにおいて、異なる列で同じヘッダー名
 
 ---
 
+## ADR-012: Table Border Model for Sticky DataGrid (border-collapse: separate)
+
+**Date**: 2025-12-28
+
+**Status**: Accepted
+
+**Context**:
+DataGridは`<table>` + `position: sticky`でヘッダー行・行番号列・コーナーセルを固定しているが、`border-collapse: collapse`ではスクロール/選択時にボーダー欠けや透け（bleeding）が発生しやすい。
+
+**Decision**:
+`border-collapse: separate` + `border-spacing: 0`へ移行し、グリッド線は「右/下の線 + 外周（上/左）」で描画する。
+また、選択色が半透明なテーマでも透けないよう、選択時の背景は「不透明なベース色 + 選択色のオーバーレイ」で合成する。
+
+**Rationale**:
+- `collapse`の「ボーダー共有」と`sticky`の相互作用を避け、描画を安定させるため
+- 余計な1pxスクロールや境界線の消失を抑えるため
+- 疑似要素によるハックを最小化し、保守性を上げるため
+
+**Consequences**:
+- ✅ スクロール/選択時の描画が安定（ボーダー欠け・透けが起きにくい）
+- ✅ 目的（見た目の踏襲）を保ちつつ実装が整理される
+- ⚠️ 既存の`collapse`前提CSS（ボーダー指定）は整理・置き換えが必要
+
+---
+
 ## Summary
 
 このプロジェクトは、Svelte 5とViteを使用したモダンなVS Code拡張機能として設計されています。主な技術的決定は、最新のWeb標準（ESM）とSvelte 5の新機能（runes）を活用しつつ、実装のシンプルさと保守性を優先しています。また、Markdownのパースにおいては、厳密なバリデーションよりもユーザーの入力意図とデータの保全、そしてMarkdownとしての可読性を重視する方針をとっています。

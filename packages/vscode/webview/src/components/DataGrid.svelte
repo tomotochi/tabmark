@@ -791,15 +791,31 @@
   table {
     width: max-content;
     min-width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 13px;
   }
 
   th,
   td {
-    border: 1px solid var(--vscode-panel-border);
+    border: none;
     padding: 0;
     position: relative;
+  }
+
+  /* Grid borders (avoid double borders by drawing only right/bottom; add top/left for outer edge) */
+  th,
+  td {
+    border-right: 1px solid var(--vscode-panel-border);
+    border-bottom: 1px solid var(--vscode-panel-border);
+  }
+
+  thead th {
+    border-top: 1px solid var(--vscode-panel-border);
+  }
+
+  tr > :first-child {
+    border-left: 1px solid var(--vscode-panel-border);
   }
 
   td {
@@ -819,10 +835,32 @@
     top: 0;
     z-index: 10;
     cursor: pointer;
+    isolation: isolate;
+    contain: paint;
+    transform: translateZ(0);
+  }
+
+  /* Extend background to cover bleed */
+  th::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    pointer-events: none;
+    z-index: -1;
   }
 
   th.selected {
-    background-color: var(--vscode-list-activeSelectionBackground);
+    /* Prevent see-through if the theme selection color has alpha by compositing over an opaque base. */
+    background:
+      linear-gradient(
+        var(--vscode-list-activeSelectionBackground),
+        var(--vscode-list-activeSelectionBackground)
+      ),
+      var(--vscode-editorGroupHeader-tabsBackground);
     color: var(--vscode-list-activeSelectionForeground);
     font-weight: bold;
   }
@@ -830,10 +868,28 @@
   .corner-cell {
     position: sticky;
     left: 0;
+    top: 0;
     z-index: 15;
     min-width: 50px;
     max-width: 50px;
     cursor: default;
+    isolation: isolate;
+    contain: paint;
+    transform: translateZ(0);
+    background-color: var(--vscode-editorGroupHeader-tabsBackground);
+  }
+
+  /* Extend background to cover bleed in both directions */
+  .corner-cell::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    pointer-events: none;
+    z-index: -1;
   }
 
   .header-text {
@@ -852,10 +908,43 @@
     left: 0;
     z-index: 5;
     cursor: pointer;
+    isolation: isolate;
+    contain: paint;
+    transform: translateZ(0);
+  }
+
+  /* Ensure corner cell also paints as selected during full selection */
+  .corner-cell.selected {
+    /* Prevent see-through if the theme selection color has alpha by compositing over an opaque base. */
+    background:
+      linear-gradient(
+        var(--vscode-list-activeSelectionBackground),
+        var(--vscode-list-activeSelectionBackground)
+      ),
+      var(--vscode-editorGroupHeader-tabsBackground);
+  }
+
+  /* Extend background to cover bleed on left side */
+  .row-number::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -1px;
+    bottom: 0;
+    width: calc(100% + 1px);
+    background: inherit;
+    pointer-events: none;
+    z-index: -1;
   }
 
   .row-number.selected {
-    background-color: var(--vscode-list-activeSelectionBackground);
+    /* Prevent see-through if the theme selection color has alpha by compositing over an opaque base. */
+    background:
+      linear-gradient(
+        var(--vscode-list-activeSelectionBackground),
+        var(--vscode-list-activeSelectionBackground)
+      ),
+      var(--vscode-sideBar-background);
     color: var(--vscode-list-activeSelectionForeground);
     font-weight: bold;
     /* No outline/border to distinguish from cells */
