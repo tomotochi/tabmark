@@ -17,9 +17,10 @@ tests/**
 # Sample files
 sample/**
 
-# Assets (exclude all except the main icon)
+# Assets (exclude all except the main icon and demo)
 assets/**
 !assets/tabmark.png
+!assets/demo.gif
 
 # Build artifacts
 *.tsbuildinfo
