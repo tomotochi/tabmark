@@ -4,6 +4,10 @@
 
 Tabmark は、**Markdown の階層構造**（`#`、`##`、`###` などの見出し）をスプレッドシートのようなデータグリッドとして再解釈する VS Code 拡張機能です。通常の Markdown テーブル記法（`|---|---|`）のエディタ**ではありません**。
 
+<div align="center">
+  <img src="./assets/demo.gif" width="800" height="436" style="max-width: 100%; height: auto;" alt="Tabmark Demo">
+</div>
+
 ## Tabmark とは？
 
 Tabmark は Markdown の見出し階層を使って表形式データを表現します：

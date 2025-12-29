@@ -42,6 +42,7 @@
       {
         "command": "tabmark.openDataGrid",
         "title": "Open as DataGrid",
+        "category": "Tabmark",
         "icon": "$(table)"
       },
       {
@@ -56,11 +57,11 @@
       }
     ],
     "menus": {
-      "editor/title": [
+      "explorer/context": [
         {
           "command": "tabmark.openDataGrid",
-          "when": "resourceExtname == .md && resourceFilename =~ /\\.table\\.md$/",
-          "group": "navigation"
+          "when": "resourceFilename =~ /\\.table\\.md$/",
+          "group": "navigation@24"
         }
       ]
     }

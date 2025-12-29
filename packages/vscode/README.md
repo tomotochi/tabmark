@@ -4,6 +4,10 @@ Read this in other languages: English | [日本語](./README.ja.md)
 
 Tabmark is a VS Code extension that reinterprets **hierarchical Markdown structure** (headings like `#`, `##`, `###`) as a spreadsheet-like datagrid. This is **not** a traditional Markdown table (`|---|---|`) editor.
 
+<div align="center">
+  <img src="./assets/demo.gif" width="800" height="436" style="max-width: 100%; height: auto;" alt="Tabmark Demo">
+</div>
+
 ## What is Tabmark?
 
 Tabmark uses Markdown's heading hierarchy to represent tabular data:
@@ -34,6 +38,10 @@ By leveraging Markdown's hierarchical structure, we get data that's both machine
 1. Open a `*.table.md` file in VS Code
 2. The file will automatically open in the Tabmark DataGrid editor
 3. Use "Export to CSV" or "Import from CSV" commands from the command palette to convert data
+
+## Cursor note
+
+In Cursor, the editor title button may not appear even though it is available in VS Code. You can still run **Tabmark: Open as DataGrid** from the command palette or via right-click in the editor.
 
 ## Development
 

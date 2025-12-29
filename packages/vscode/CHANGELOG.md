@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.3] - 2025-12-28
+
+### Fixed
+
+- Improved DataGrid rendering stability when using sticky headers/row numbers during scrolling
+- Prevented selected row/column/all sticky areas from showing underlying cell content in some themes
+
+### Changed
+
+- DataGrid table border model now uses `border-collapse: separate` to avoid border-collapse rendering artifacts
+
 ## [0.1.2] - 2025-12-07
 
 ### Added
