@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4] - 2025-12-30
+
+### Changed
+
+- VSIX packaging now rewrites README links/images using `vsce` base URLs for better Marketplace rendering
+- Updated `repository.url` to use HTTPS (no `git+` prefix)
+
 ## [0.1.3] - 2025-12-28
 
 ### Fixed

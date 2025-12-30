@@ -3,13 +3,13 @@
   "private": true,
   "displayName": "Tabmark",
   "description": "Edit Markdown files as DataGrid",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "tomo-tochi",
   "author": "tomo_tochi",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tomotochi/tabmark.git",
+    "url": "https://github.com/tomotochi/tabmark.git",
     "directory": "packages/vscode"
   },
   "homepage": "https://github.com/tomotochi/tabmark/tree/main/packages/vscode#readme",
@@ -72,7 +72,8 @@
     "compile": "node esbuild.cjs",
     "watch": "node esbuild.cjs --watch",
     "package": "node esbuild.cjs --production && npm run build:webview",
-    "vsce:package": "vsce package --no-dependencies",
+    "vsce:package": "vsce package --no-dependencies --baseContentUrl=https://github.com/tomotochi/tabmark/blob/main/packages/vscode --baseImagesUrl=https://github.com/tomotochi/tabmark/raw/main/packages/vscode",
+    "vsce:publish": "vsce publish --no-dependencies --baseContentUrl=https://github.com/tomotochi/tabmark/blob/main/packages/vscode --baseImagesUrl=https://github.com/tomotochi/tabmark/raw/main/packages/vscode",
     "build:webview": "vite build",
     "watch:webview": "vite build --watch",
     "test": "vitest run"
