@@ -4,9 +4,7 @@ Read this in other languages: English | [日本語](./README.ja.md)
 
 Tabmark is a VS Code extension that reinterprets **hierarchical Markdown structure** (headings like `#`, `##`, `###`) as a spreadsheet-like datagrid. This is **not** a traditional Markdown table (`|---|---|`) editor.
 
-<div align="center">
-  <img src="./assets/demo.gif" width="800" height="436" style="max-width: 100%; height: auto;" alt="Tabmark Demo">
-</div>
+![Tabmark Demo](./assets/demo.gif)
 
 ## What is Tabmark?
 
