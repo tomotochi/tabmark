@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Tabmark Grid for GitHub",
+  "version": "0.0.0",
+  "description": "Adds a read-only Grid view for Tabmark (*.table.md) files on GitHub.",
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["dist/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": ["https://github.com/*", "https://raw.githubusercontent.com/*"]
+}
+
+
