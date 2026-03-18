@@ -3,14 +3,21 @@ import { isTabmarkBlobUrl } from './github/url';
 import { getRawUrlFromDom, fetchRawMarkdown } from './tabmark/fetchRaw';
 import { parseTabmarkMarkdownToGrid } from './tabmark/parseToGrid';
 import { renderGridTable } from './tabmark/renderGrid';
-import { injectGridButton, removeInjectedButton } from './ui/injectTabs';
+import {
+  injectGridButton,
+  removeInjectedButton,
+  TABMARK_GRID_BUTTON_ID,
+} from './ui/injectTabs';
 import { ensureStylesInjected } from './ui/styles';
-import { findFileBoxContainer } from './github/selectors';
+import { findFileContentContainer } from './github/selectors';
 
 const INJECT_MARKER_ATTR = 'data-tabmark-grid-injected';
 const TABMARK_GRID_ROOT_ID = 'tabmark-grid-root';
 const TABMARK_GRID_PANEL_ID = 'tabmark-grid-panel';
 const TABMARK_GRID_STATUS_ID = 'tabmark-grid-status';
+const TABMARK_GRID_ORIGINAL_ID = 'tabmark-grid-original';
+const TABMARK_WRAPPED_ATTR = 'data-tabmark-grid-wrapped';
+let pendingInjectObserver: MutationObserver | null = null;
 
 function shouldRunOnThisPage(): boolean {
   try {
@@ -35,23 +42,41 @@ function clearInjected(): void {
 function removeInjectedUi(): void {
   removeInjectedButton();
   document.getElementById(TABMARK_GRID_ROOT_ID)?.remove();
+  const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
+  const contentHost = findFileContentContainer();
+  if (original && contentHost) {
+    while (original.firstChild) {
+      contentHost.insertBefore(original.firstChild, original);
+    }
+    original.remove();
+    contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
+  }
+  if (pendingInjectObserver) {
+    pendingInjectObserver.disconnect();
+    pendingInjectObserver = null;
+  }
 }
 
-function ensureRootContainer(): HTMLElement {
+function ensureRootContainer(): HTMLElement | null {
   ensureStylesInjected();
 
   const existing = document.getElementById(TABMARK_GRID_ROOT_ID);
   if (existing) return existing;
 
-  // Best-effort insertion: place inside the file's Box when possible, so it
-  // feels like an additional view for the file (not a random page widget).
-  const fileBox = findFileBoxContainer();
-  const parent =
-    fileBox?.querySelector<HTMLElement>('.Box-body') ??
-    fileBox ??
-    document.querySelector<HTMLElement>('#repo-content-pjax-container') ??
-    document.querySelector<HTMLElement>('main') ??
-    document.body;
+  // Prefer replacing the main file content area (Preview/Code) with our panel.
+  const contentHost = findFileContentContainer();
+  if (!contentHost) return null;
+
+  if (contentHost && !contentHost.hasAttribute(TABMARK_WRAPPED_ATTR)) {
+    const original = document.createElement('div');
+    original.id = TABMARK_GRID_ORIGINAL_ID;
+    original.className = 'tabmark-grid-original';
+    while (contentHost.firstChild) {
+      original.appendChild(contentHost.firstChild);
+    }
+    contentHost.appendChild(original);
+    contentHost.setAttribute(TABMARK_WRAPPED_ATTR, 'true');
+  }
 
   const root = document.createElement('div');
   root.id = TABMARK_GRID_ROOT_ID;
@@ -69,7 +94,7 @@ function ensureRootContainer(): HTMLElement {
 
   panel.appendChild(status);
   root.appendChild(panel);
-  parent.appendChild(root);
+  contentHost.appendChild(root);
 
   return root;
 }
@@ -107,19 +132,66 @@ function init(): void {
   if (alreadyInjected()) return;
 
   const root = ensureRootContainer();
+  if (!root) return;
   const panel = root.querySelector<HTMLElement>(`#${TABMARK_GRID_PANEL_ID}`);
   if (!panel) return;
 
-  injectGridButton(() => {
+  const button = injectGridButton(() => {
     const isVisible = panel.style.display !== 'none';
+    const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
+    const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
     if (isVisible) {
       panel.style.display = 'none';
+      if (original) original.style.display = '';
+      if (gridButton) {
+        gridButton.classList.remove('tabmark-grid-tab--active');
+      }
       return;
+    }
+    if (original) original.style.display = 'none';
+    if (gridButton) {
+      gridButton.classList.add('tabmark-grid-tab--active');
     }
     void showGrid(panel);
   });
 
-  markInjected();
+  if (button) {
+    markInjected();
+    return;
+  }
+
+  // If the Raw button isn't in the DOM yet, wait for it and retry once.
+  if (!pendingInjectObserver) {
+    pendingInjectObserver = new MutationObserver(() => {
+      const retryButton = injectGridButton(() => {
+        const isVisible = panel.style.display !== 'none';
+        const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
+        const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
+        if (isVisible) {
+          panel.style.display = 'none';
+          if (original) original.style.display = '';
+          if (gridButton) {
+            gridButton.classList.remove('tabmark-grid-tab--active');
+          }
+          return;
+        }
+        if (original) original.style.display = 'none';
+        if (gridButton) {
+          gridButton.classList.add('tabmark-grid-tab--active');
+        }
+        void showGrid(panel);
+      });
+      if (retryButton) {
+        markInjected();
+        pendingInjectObserver?.disconnect();
+        pendingInjectObserver = null;
+      }
+    });
+    pendingInjectObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  }
 }
 
 init();
@@ -127,5 +199,3 @@ onGitHubNavigation(() => {
   // When navigating away, we want to allow injection on the next matching page.
   init();
 });
-
-

@@ -285,7 +285,7 @@ export class TabmarkEditorProvider implements vscode.CustomTextEditorProvider {
           };
           const sheetName = 'Sheet1';
           const initialMarkdown = this.parser.fromGridData(sheetName, gridData);
-          
+
           isProgrammaticUpdate = true;
           const edit = new vscode.WorkspaceEdit();
           const fullRange = new vscode.Range(

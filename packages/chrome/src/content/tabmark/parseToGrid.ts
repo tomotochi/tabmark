@@ -42,5 +42,3 @@ export function parseTabmarkMarkdownToGrid(markdown: string): TabmarkGridViewDat
   const rowIds = sortRowIds(parsed.sheets[firstSheetName].rows);
   return { sheetName: firstSheetName, headers: grid.headers, rows: grid.rows, rowIds };
 }
-
-

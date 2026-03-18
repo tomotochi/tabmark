@@ -46,5 +46,3 @@ export function onGitHubNavigation(handler: NavigationHandler): () => void {
     observer.disconnect();
   };
 }
-
-

@@ -7,7 +7,7 @@ export function ensureStylesInjected(): void {
   style.id = TABMARK_STYLE_ELEMENT_ID;
   style.textContent = `
     .tabmark-grid-root {
-      margin-top: 12px;
+      margin-top: 0;
     }
 
     .tabmark-grid-toolbar {
@@ -19,6 +19,48 @@ export function ensureStylesInjected(): void {
 
     .tabmark-grid-button {
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tabmark-grid-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: inherit;
+    }
+
+    .tabmark-grid-icon svg {
+      display: block;
+      width: 14px;
+      height: 14px;
+    }
+
+    .tabmark-grid-tab {
+      cursor: pointer;
+      text-decoration: none;
+      margin-left: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tabmark-grid-tab:hover {
+      background: var(--control-transparent-bgColor-hover, rgba(208, 215, 222, 0.32));
+      text-decoration: none;
+    }
+
+    .tabmark-grid-tab.tabmark-grid-tab--active {
+      background: var(--control-transparent-bgColor-active, rgba(208, 215, 222, 0.48));
+      font-weight: 600;
+    }
+
+    .tabmark-grid-original {
+      display: block;
     }
 
     .tabmark-grid-panel {
@@ -86,5 +128,3 @@ export function ensureStylesInjected(): void {
 
   document.head.appendChild(style);
 }
-
-

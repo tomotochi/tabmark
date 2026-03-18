@@ -43,5 +43,3 @@ export function renderGridTable(view: TabmarkGridViewData): HTMLTableElement {
   table.appendChild(tbody);
   return table;
 }
-
-

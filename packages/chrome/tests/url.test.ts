@@ -22,5 +22,3 @@ describe('isTabmarkBlobUrl', () => {
     expect(isTabmarkBlobUrl(url)).toBe(false);
   });
 });
-
-

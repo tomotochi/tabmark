@@ -30,5 +30,3 @@ export function isTabmarkBlobUrl(url: URL): boolean {
   if (!isGitHubDotCom(url.hostname)) return false;
   return isTabmarkBlobPathname(url.pathname);
 }
-
-

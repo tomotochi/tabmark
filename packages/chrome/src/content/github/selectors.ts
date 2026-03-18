@@ -1,6 +1,27 @@
 export function findRawUrlAnchor(): HTMLAnchorElement | null {
   // GitHub blob pages typically have an anchor with id="raw-url".
-  return document.querySelector<HTMLAnchorElement>('a#raw-url');
+  const direct = document.querySelector<HTMLAnchorElement>(
+    'a#raw-url, a[data-testid="raw-button"], a[data-testid="raw-url"]',
+  );
+  if (direct) return direct;
+
+  const header =
+    document.querySelector<HTMLElement>('[data-testid="file-header"]') ??
+    document.querySelector<HTMLElement>('.Box-header');
+
+  const findByText = (root: ParentNode | Document): HTMLAnchorElement | null =>
+    Array.from(root.querySelectorAll<HTMLAnchorElement>('a')).find((anchor) => {
+      const label = anchor.textContent?.trim();
+      if (label !== 'Raw') return false;
+      return anchor.href.includes('/raw/');
+    }) ?? null;
+
+  if (header) {
+    const fromHeader = findByText(header);
+    if (fromHeader) return fromHeader;
+  }
+
+  return findByText(document);
 }
 
 export function findFileBoxContainer(): HTMLElement | null {
@@ -10,18 +31,62 @@ export function findFileBoxContainer(): HTMLElement | null {
 }
 
 export function findFileHeaderActionsContainer(): HTMLElement | null {
-  // Best-effort: walk up from the Raw link and locate a nearby container to
-  // append our button without fighting GitHub's layout too much.
-  const raw = findRawUrlAnchor();
-  if (!raw) return null;
+  // Prefer known actions containers in the file header.
+  const direct =
+    document.querySelector<HTMLElement>(
+      '#repos-sticky-header div[class*="BlobViewHeader-module__Box_3"]',
+    ) ??
+    document.querySelector<HTMLElement>('[data-testid="file-header-actions"]') ??
+    document.querySelector<HTMLElement>('.file-header-actions') ??
+    document.querySelector<HTMLElement>('.Box-header .BtnGroup') ??
+    document.querySelector<HTMLElement>('.Box-header [role="group"]');
 
-  // Prefer a button group / actions container.
+  if (direct) return direct;
+
+  // Best-effort: walk up from the Raw link and locate a nearby container.
+  const raw = findRawUrlAnchor();
   return (
-    raw.closest<HTMLElement>('[data-testid="file-header-actions"]') ??
-    raw.closest<HTMLElement>('.file-header-actions') ??
-    raw.closest<HTMLElement>('.d-flex') ??
-    raw.parentElement
+    raw?.closest<HTMLElement>('[data-testid="file-header-actions"]') ??
+    raw?.closest<HTMLElement>('.file-header-actions') ??
+    raw?.closest<HTMLElement>('.d-flex') ??
+    raw?.parentElement ??
+    null
   );
 }
 
+export function findFileModeTabsContainer(): HTMLElement | null {
+  const candidates = Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[role="tablist"], .tabnav-tabs, .UnderlineNav, nav',
+    ),
+  );
 
+  const hasTab = (root: ParentNode, label: string): boolean =>
+    Array.from(root.querySelectorAll<HTMLElement>('a, button, span')).some(
+      (el) => el.textContent?.trim() === label,
+    );
+
+  for (const candidate of candidates) {
+    if (hasTab(candidate, 'Preview') && hasTab(candidate, 'Code')) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+export function findFileContentContainer(): HTMLElement | null {
+  const hardCoded = document.querySelector<HTMLElement>(
+    '#repo-content-pjax-container > react-app > div > div > div.prc-PageLayout-PageLayoutRoot--KH-d > div > div > div.prc-PageLayout-ContentWrapper-gR9eG > div > div > div:nth-child(3) > div.Box-sc-62in7e-0.hGzGyY > div > div.Box-sc-62in7e-0.dIDnLY > section > div',
+  );
+  if (hardCoded) return hardCoded;
+
+  const fileBox = findFileBoxContainer();
+  if (!fileBox) return null;
+
+  return (
+    fileBox.querySelector<HTMLElement>('.Box-body') ??
+    fileBox.querySelector<HTMLElement>('[data-testid="file-view-content"]') ??
+    null
+  );
+}
