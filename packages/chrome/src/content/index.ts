@@ -42,14 +42,19 @@ function clearInjected(): void {
 
 function removeInjectedUi(): void {
   removeInjectedButton();
-  document.getElementById(TABMARK_GRID_ROOT_ID)?.remove();
-  const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
+  // Scope cleanup to the current active page content so we don't accidentally
+  // break GitHub's cached pages in the DOM.
   const contentHost = findFileContentContainer();
-  if (original && contentHost) {
-    while (original.firstChild) {
-      contentHost.insertBefore(original.firstChild, original);
+  if (contentHost) {
+    contentHost.querySelector('.tabmark-grid-root')?.remove();
+    const original = contentHost.querySelector<HTMLElement>('.tabmark-grid-original');
+    if (original) {
+      while (original.firstChild) {
+        contentHost.insertBefore(original.firstChild, original);
+      }
+      original.remove();
     }
-    original.remove();
+    // ALWAYS remove the attribute, even if `original` was destroyed by GitHub React
     contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
   }
   // Clean up layout override attribute
@@ -149,7 +154,8 @@ function init(): void {
 
   const button = injectGridButton(() => {
     const isVisible = panel.style.display !== 'none';
-    const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
+    const contentHost = findFileContentContainer();
+    const original = contentHost?.querySelector<HTMLElement>('.tabmark-grid-original');
     const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
     const flexRow = findFlexRowContainer();
     if (isVisible) {
@@ -180,8 +186,14 @@ function init(): void {
     // because GitHub may replace the entire sticky header element, which would
     // cause an observer attached to the old element to never fire.
     if (!pendingInjectObserver) {
+      const observerSetupHref = location.href;
       pendingInjectObserver = new MutationObserver(() => {
         if (!document.getElementById(TABMARK_GRID_BUTTON_ID)) {
+          // If the URL has changed, this is a SPA navigation — let onGitHubNavigation
+          // (which runs after its 200ms debounce) handle cleanup and re-injection
+          // against the fully-loaded new DOM. Re-injecting here against a partially
+          // updated DOM causes wrapping of the wrong element and broken toggle state.
+          if (location.href !== observerSetupHref) return;
           pendingInjectObserver?.disconnect();
           pendingInjectObserver = null;
           init();
