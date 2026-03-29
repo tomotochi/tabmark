@@ -24,11 +24,9 @@
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.0",
+    "playwright": "^1.58.2",
     "prettier": "^3.2.5",
     "prettier-plugin-svelte": "^3.4.0",
     "svelte": "^5.45.6"
-  },
-  "dependencies": {
-    "playwright": "^1.58.2"
   }
 }
