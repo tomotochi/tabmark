@@ -1,3 +1,4 @@
+import { debugLog } from './utils/logger';
 import { onGitHubNavigation } from './github/navigation';
 import { isTabmarkBlobUrl } from './github/url';
 import { getRawUrlFromDom, fetchRawMarkdown } from './tabmark/fetchRaw';
@@ -29,7 +30,10 @@ function shouldRunOnThisPage(): boolean {
 }
 
 function alreadyInjected(): boolean {
-  return document.documentElement.hasAttribute(INJECT_MARKER_ATTR);
+  const hasMarker = document.documentElement.hasAttribute(INJECT_MARKER_ATTR);
+  const hasButton = document.getElementById(TABMARK_GRID_BUTTON_ID) !== null;
+  const hasRoot = document.getElementById(TABMARK_GRID_ROOT_ID) !== null;
+  return hasMarker && hasButton && hasRoot;
 }
 
 function markInjected(): void {
@@ -69,11 +73,12 @@ function ensureRootContainer(): HTMLElement | null {
   ensureStylesInjected();
 
   const existing = document.getElementById(TABMARK_GRID_ROOT_ID);
-  if (existing) return existing;
+  if (existing) { debugLog('ensureRootContainer() reused existing root.'); return existing; }
 
   // Prefer replacing the main file content area (Preview/Code) with our panel.
   const contentHost = findFileContentContainer();
-  if (!contentHost) return null;
+  if (!contentHost) { debugLog('ensureRootContainer() failed: findFileContentContainer() returned null.'); return null; }
+  debugLog('ensureRootContainer() found contentHost:', contentHost.tagName, contentHost.className);
 
   if (contentHost && !contentHost.hasAttribute(TABMARK_WRAPPED_ATTR)) {
     const original = document.createElement('div');
@@ -140,17 +145,42 @@ async function showGrid(panel: HTMLElement): Promise<void> {
 }
 
 function init(): void {
+  debugLog('init() started. URL:', location.href);
   // Reset marker on every init attempt. We re-add it only if we actually inject.
   clearInjected();
   removeInjectedUi();
 
-  if (!shouldRunOnThisPage()) return;
-  if (alreadyInjected()) return;
+  if (!shouldRunOnThisPage()) { debugLog('init() aborted: shouldRunOnThisPage() returned false.'); return; }
+  if (alreadyInjected()) { debugLog('init() aborted: alreadyInjected() returned true.'); return; }
 
   const root = ensureRootContainer();
-  if (!root) return;
+  if (!root) {
+    debugLog('init() aborted: ensureRootContainer() returned null.');
+    // Large files / GitHub re-renders may delay the blob content container.
+    // Retry once the content host appears.
+    if (!pendingInjectObserver) {
+      const observerSetupHref = location.href;
+      const startAt = Date.now();
+      pendingInjectObserver = new MutationObserver(() => {
+        if (location.href !== observerSetupHref) return;
+        if (Date.now() - startAt > 10000) {
+          pendingInjectObserver?.disconnect();
+          pendingInjectObserver = null;
+          return;
+        }
+        const contentHost = findFileContentContainer();
+        if (!contentHost) return;
+        pendingInjectObserver?.disconnect();
+        pendingInjectObserver = null;
+        init();
+      });
+      pendingInjectObserver.observe(document.documentElement, { childList: true, subtree: true });
+    }
+    return;
+  }
+  
   const panel = root.querySelector<HTMLElement>(`#${TABMARK_GRID_PANEL_ID}`);
-  if (!panel) return;
+  if (!panel) { debugLog('init() aborted: panel not found in root.'); return; }
 
   const button = injectGridButton(() => {
     const isVisible = panel.style.display !== 'none';

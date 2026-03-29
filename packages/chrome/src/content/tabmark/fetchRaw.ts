@@ -1,4 +1,4 @@
-import { findRawUrlAnchor } from '../github/selectors';
+import { findRawButton } from '../github/selectors';
 import { isTabmarkBlobUrl } from '../github/url';
 
 export class RawFetchError extends Error {
@@ -9,8 +9,8 @@ export class RawFetchError extends Error {
 }
 
 export function getRawUrlFromDom(): string {
-  const raw = findRawUrlAnchor();
-  const href = raw?.href;
+  const raw = findRawButton();
+  const href = raw instanceof HTMLAnchorElement ? raw.href : undefined;
   if (!href) {
     const url = new URL(location.href);
     if (!isTabmarkBlobUrl(url)) {

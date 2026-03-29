@@ -1,19 +1,63 @@
-export function findRawUrlAnchor(): HTMLAnchorElement | null {
-  // GitHub blob pages typically have an anchor with id="raw-url".
-  const direct = document.querySelector<HTMLAnchorElement>(
-    'a#raw-url, a[data-testid="raw-button"], a[data-testid="raw-url"]',
-  );
+import { debugLog } from '../utils/logger';
+/**
+ * Returns the first matching element that is actually visible (not hidden by GitHub's SPA cache).
+ */
+function queryVisible<T extends HTMLElement>(selectors: string[]): T | null {
+  for (const selector of selectors) {
+    const elements = document.querySelectorAll<T>(selector);
+    for (const el of Array.from(elements)) {
+      if (el.getBoundingClientRect().height > 0 || el.getBoundingClientRect().width > 0) {
+        debugLog('queryVisible(): matched', selector, el.className);
+        return el;
+      }
+    }
+  }
+  debugLog('queryVisible(): NO MATCH for any of', selectors);
+  return null;
+}
+
+/**
+ * Returns the first matching element regardless of current layout visibility.
+ * Use for DOM injection targets where the element may be temporarily 0px
+ * during GitHub's large-file / re-render states.
+ */
+function queryAny<T extends HTMLElement>(selectors: string[]): T | null {
+  for (const selector of selectors) {
+    const elements = document.querySelectorAll<T>(selector);
+    for (const el of Array.from(elements)) {
+      if (el.isConnected) return el;
+    }
+  }
+  return null;
+}
+
+export function findRawButton(): HTMLElement | null {
+  // GitHub blob pages typically have an element with id="raw-url" or testid.
+  // It can be an <a> or a <button> depending on the view context.
+  const direct = queryVisible<HTMLElement>([
+    '#raw-url', '[data-testid="raw-button"]', '[data-testid="raw-url"]'
+  ]) ?? queryAny<HTMLElement>([
+    '#raw-url', '[data-testid="raw-button"]', '[data-testid="raw-url"]'
+  ]);
   if (direct) return direct;
 
-  const header =
-    document.querySelector<HTMLElement>('[data-testid="file-header"]') ??
-    document.querySelector<HTMLElement>('.Box-header');
+  const header = queryVisible<HTMLElement>([
+    '[data-testid="file-header"]',
+    '.Box-header'
+  ]) ?? queryAny<HTMLElement>([
+    '[data-testid="file-header"]',
+    '.Box-header'
+  ]);
 
-  const findByText = (root: ParentNode | Document): HTMLAnchorElement | null =>
-    Array.from(root.querySelectorAll<HTMLAnchorElement>('a')).find((anchor) => {
-      const label = anchor.textContent?.trim();
-      if (label !== 'Raw') return false;
-      return anchor.href.includes('/raw/');
+  const findByText = (root: ParentNode | Document): HTMLElement | null =>
+    Array.from(root.querySelectorAll<HTMLElement>('a, button')).find((el) => {
+      const label = el.textContent?.trim();
+      const aria = el.getAttribute('aria-label')?.trim();
+      const title = el.getAttribute('title')?.trim();
+      const tooltip = el.getAttribute('data-tooltip')?.trim();
+      const hasRawLabel = [label, aria, title, tooltip].includes('Raw');
+      if (!hasRawLabel) return false;
+      return el instanceof HTMLAnchorElement ? el.href.includes('/raw/') : true;
     }) ?? null;
 
   if (header) {
@@ -25,26 +69,33 @@ export function findRawUrlAnchor(): HTMLAnchorElement | null {
 }
 
 export function findFileBoxContainer(): HTMLElement | null {
-  const raw = findRawUrlAnchor();
+  const raw = findRawButton();
   if (!raw) return null;
   return raw.closest<HTMLElement>('.Box');
 }
 
 export function findFileHeaderActionsContainer(): HTMLElement | null {
   // Prefer known actions containers in the file header.
-  const direct =
-    document.querySelector<HTMLElement>(
-      '#repos-sticky-header div[class*="BlobViewHeader-module__Box_3"]',
-    ) ??
-    document.querySelector<HTMLElement>('[data-testid="file-header-actions"]') ??
-    document.querySelector<HTMLElement>('.file-header-actions') ??
-    document.querySelector<HTMLElement>('.Box-header .BtnGroup') ??
-    document.querySelector<HTMLElement>('.Box-header [role="group"]');
+  const direct = queryVisible<HTMLElement>([
+    '#repos-sticky-header div[class*="BlobViewHeader-module__Box_3"]',
+    '#repos-sticky-header div[class*="BlobViewHeader"] > div[class*="BlobViewHeader"] > div:last-child',
+    '[data-testid="file-header-actions"]',
+    '.file-header-actions',
+    '.Box-header .BtnGroup',
+    '.Box-header [role="group"]'
+  ]) ?? queryAny<HTMLElement>([
+    '#repos-sticky-header div[class*="BlobViewHeader-module__Box_3"]',
+    '#repos-sticky-header div[class*="BlobViewHeader"] > div[class*="BlobViewHeader"] > div:last-child',
+    '[data-testid="file-header-actions"]',
+    '.file-header-actions',
+    '.Box-header .BtnGroup',
+    '.Box-header [role="group"]'
+  ]);
 
   if (direct) return direct;
 
   // Best-effort: walk up from the Raw link and locate a nearby container.
-  const raw = findRawUrlAnchor();
+  const raw = findRawButton();
   return (
     raw?.closest<HTMLElement>('[data-testid="file-header-actions"]') ??
     raw?.closest<HTMLElement>('.file-header-actions') ??
@@ -58,7 +109,7 @@ export function findFileModeTabsContainer(): HTMLElement | null {
   const candidates = Array.from(
     document.querySelectorAll<HTMLElement>(
       '[role="tablist"], .tabnav-tabs, .UnderlineNav, nav',
-    ),
+    )
   );
 
   const hasTab = (root: ParentNode, label: string): boolean =>
@@ -75,48 +126,49 @@ export function findFileModeTabsContainer(): HTMLElement | null {
   return null;
 }
 
-/**
- * Returns the first matching element that is actually visible (not hidden by GitHub's SPA cache).
- */
-function queryVisible<T extends HTMLElement>(selectors: string[]): T | null {
-  for (const selector of selectors) {
-    const elements = document.querySelectorAll<T>(selector);
-    for (const el of Array.from(elements)) {
-      if (el.getBoundingClientRect().height > 0 || el.getBoundingClientRect().width > 0) {
-        return el;
-      }
-    }
-  }
-  return null;
-}
 
 export function findFileContentContainer(): HTMLElement | null {
   // 1. Markdown blob content element — most precise; confirmed on target page.
   //    We want to swap only the rendered markdown, not the surrounding layout.
-  const byBlob = queryVisible<HTMLElement>([
+  const byBlob =
+    queryVisible<HTMLElement>([
     'div[class*="BlobContent-module__markdownBlob"]',
     'div[class*="BlobViewContent-module__blobContentWrapper"]'
-  ]);
+    ]) ?? queryAny<HTMLElement>([
+      'div[class*="BlobContent-module__markdownBlob"]',
+      'div[class*="BlobViewContent-module__blobContentWrapper"]'
+    ]);
   if (byBlob) return byBlob;
 
   // 2. Stable test-id selectors (version-agnostic)
-  const byTestId = queryVisible<HTMLElement>([
+  const byTestId =
+    queryVisible<HTMLElement>([
     '[data-testid="blob-content"]',
     '[data-testid="file-view-content"]',
     '[data-testid="file-blob"]'
-  ]);
+    ]) ?? queryAny<HTMLElement>([
+      '[data-testid="blob-content"]',
+      '[data-testid="file-view-content"]',
+      '[data-testid="file-blob"]'
+    ]);
   if (byTestId) return byTestId;
 
   // 3. Current GitHub React UI layout class (prc-* prefix) — broad fallback
-  const byPrc = queryVisible<HTMLElement>(['div.prc-PageLayout-ContentWrapper-gR9eG']);
+  const byPrc =
+    queryVisible<HTMLElement>(['div.prc-PageLayout-ContentWrapper-gR9eG']) ??
+    queryAny<HTMLElement>(['div.prc-PageLayout-ContentWrapper-gR9eG']);
   if (byPrc) return byPrc;
 
   // 4. react-app semantic elements
-  const bySemantics = queryVisible<HTMLElement>(['react-app article', 'react-app section']);
+  const bySemantics =
+    queryVisible<HTMLElement>(['react-app article', 'react-app section']) ??
+    queryAny<HTMLElement>(['react-app article', 'react-app section']);
   if (bySemantics) return bySemantics;
 
   // 5. Legacy Primer CSS class
-  const byLegacy = queryVisible<HTMLElement>(['.blob-wrapper']);
+  const byLegacy =
+    queryVisible<HTMLElement>(['.blob-wrapper']) ??
+    queryAny<HTMLElement>(['.blob-wrapper']);
   if (byLegacy) return byLegacy;
 
   // 6. Walk up from the Raw anchor — last resort

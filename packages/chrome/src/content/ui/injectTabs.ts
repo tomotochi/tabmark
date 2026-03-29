@@ -1,3 +1,4 @@
+import { debugLog } from '../utils/logger';
 import { ensureStylesInjected } from './styles';
 import {
   findFileHeaderActionsContainer,
@@ -42,6 +43,7 @@ export function injectGridButton(onClick: () => void): HTMLElement | null {
 
   const actions = findFileHeaderActionsContainer();
   if (actions) {
+    debugLog('injectGridButton(): found actions container.', actions.className);
     const btn = document.createElement('button');
     btn.id = TABMARK_GRID_BUTTON_ID;
     btn.type = 'button';
@@ -57,8 +59,10 @@ export function injectGridButton(onClick: () => void): HTMLElement | null {
     return btn;
   }
 
+  debugLog('injectGridButton(): actions container not found. Trying tabs container...');
   const tabs = findFileModeTabsContainer();
   if (tabs) {
+    debugLog('injectGridButton(): found tabs container.', tabs.className);
     const btn = document.createElement('a');
     btn.id = TABMARK_GRID_BUTTON_ID;
     btn.href = '#';
@@ -81,5 +85,6 @@ export function injectGridButton(onClick: () => void): HTMLElement | null {
     return btn;
   }
 
+  debugLog('injectGridButton() failed: neither actions nor tabs container found.');
   return null;
 }
