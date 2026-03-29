@@ -46,7 +46,6 @@ export function findFileHeaderActionsContainer(): HTMLElement | null {
   // Best-effort: walk up from the Raw link and locate a nearby container.
   const raw = findRawUrlAnchor();
   return (
-    raw?.closest<HTMLElement>('[class*="prc-ButtonGroup-ButtonGroup"]') ??
     raw?.closest<HTMLElement>('[data-testid="file-header-actions"]') ??
     raw?.closest<HTMLElement>('.file-header-actions') ??
     raw?.closest<HTMLElement>('.d-flex') ??
@@ -58,12 +57,12 @@ export function findFileHeaderActionsContainer(): HTMLElement | null {
 export function findFileModeTabsContainer(): HTMLElement | null {
   const candidates = Array.from(
     document.querySelectorAll<HTMLElement>(
-      '[role="tablist"], .tabnav-tabs, .UnderlineNav, nav, ul[aria-label="File view"]',
+      '[role="tablist"], .tabnav-tabs, .UnderlineNav, nav',
     ),
   );
 
   const hasTab = (root: ParentNode, label: string): boolean =>
-    Array.from(root.querySelectorAll<HTMLElement>('a, button, span, div')).some(
+    Array.from(root.querySelectorAll<HTMLElement>('a, button, span')).some(
       (el) => el.textContent?.trim() === label,
     );
 
@@ -81,11 +80,6 @@ export function findFileContentContainer(): HTMLElement | null {
     '#repo-content-pjax-container > react-app > div > div > div.prc-PageLayout-PageLayoutRoot--KH-d > div > div > div.prc-PageLayout-ContentWrapper-gR9eG > div > div > div:nth-child(3) > div.Box-sc-62in7e-0.hGzGyY > div > div.Box-sc-62in7e-0.dIDnLY > section > div',
   );
   if (hardCoded) return hardCoded;
-
-  const reactContentWrapper = document.querySelector<HTMLElement>(
-    '[class*="BlobViewContent-module__blobContentWrapper"]',
-  );
-  if (reactContentWrapper) return reactContentWrapper;
 
   const fileBox = findFileBoxContainer();
   if (!fileBox) return null;
