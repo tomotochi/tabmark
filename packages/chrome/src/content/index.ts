@@ -159,10 +159,10 @@ function init(): void {
     markInjected();
     // Watch for GitHub layout re-renders (e.g. Outline pane auto-closing) that
     // may destroy the injected button, and re-inject it if that happens.
+    // NOTE: We observe document.documentElement instead of #repos-sticky-header
+    // because GitHub may replace the entire sticky header element, which would
+    // cause an observer attached to the old element to never fire.
     if (!pendingInjectObserver) {
-      const watchRoot =
-        document.querySelector<HTMLElement>('#repos-sticky-header') ??
-        document.documentElement;
       pendingInjectObserver = new MutationObserver(() => {
         if (!document.getElementById(TABMARK_GRID_BUTTON_ID)) {
           pendingInjectObserver?.disconnect();
@@ -170,7 +170,7 @@ function init(): void {
           init();
         }
       });
-      pendingInjectObserver.observe(watchRoot, { childList: true, subtree: true });
+      pendingInjectObserver.observe(document.documentElement, { childList: true, subtree: true });
     }
     return;
   }
