@@ -15,6 +15,7 @@ const INJECT_MARKER_ATTR = 'data-tabmark-grid-injected';
 const TABMARK_GRID_ROOT_ID = 'tabmark-grid-root';
 const TABMARK_GRID_PANEL_ID = 'tabmark-grid-panel';
 const TABMARK_GRID_STATUS_ID = 'tabmark-grid-status';
+const TABMARK_GRID_ORIGINAL_ID = 'tabmark-grid-original';
 const TABMARK_WRAPPED_ATTR = 'data-tabmark-grid-wrapped';
 let pendingInjectObserver: MutationObserver | null = null;
 
@@ -41,9 +42,13 @@ function clearInjected(): void {
 function removeInjectedUi(): void {
   removeInjectedButton();
   document.getElementById(TABMARK_GRID_ROOT_ID)?.remove();
+  const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
   const contentHost = findFileContentContainer();
-  if (contentHost) {
-    contentHost.style.display = '';
+  if (original && contentHost) {
+    while (original.firstChild) {
+      contentHost.insertBefore(original.firstChild, original);
+    }
+    original.remove();
     contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
   }
   if (pendingInjectObserver) {
@@ -60,9 +65,16 @@ function ensureRootContainer(): HTMLElement | null {
 
   // Prefer replacing the main file content area (Preview/Code) with our panel.
   const contentHost = findFileContentContainer();
-  if (!contentHost || !contentHost.parentNode) return null;
+  if (!contentHost) return null;
 
-  if (!contentHost.hasAttribute(TABMARK_WRAPPED_ATTR)) {
+  if (contentHost && !contentHost.hasAttribute(TABMARK_WRAPPED_ATTR)) {
+    const original = document.createElement('div');
+    original.id = TABMARK_GRID_ORIGINAL_ID;
+    original.className = 'tabmark-grid-original';
+    while (contentHost.firstChild) {
+      original.appendChild(contentHost.firstChild);
+    }
+    contentHost.appendChild(original);
     contentHost.setAttribute(TABMARK_WRAPPED_ATTR, 'true');
   }
 
@@ -82,9 +94,7 @@ function ensureRootContainer(): HTMLElement | null {
 
   panel.appendChild(status);
   root.appendChild(panel);
-
-  // Insert the root sibling to contentHost
-  contentHost.parentNode.insertBefore(root, contentHost.nextSibling);
+  contentHost.appendChild(root);
 
   return root;
 }
@@ -128,17 +138,17 @@ function init(): void {
 
   const button = injectGridButton(() => {
     const isVisible = panel.style.display !== 'none';
-    const contentHost = findFileContentContainer();
+    const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
     const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
     if (isVisible) {
       panel.style.display = 'none';
-      if (contentHost) contentHost.style.display = '';
+      if (original) original.style.display = '';
       if (gridButton) {
         gridButton.classList.remove('tabmark-grid-tab--active');
       }
       return;
     }
-    if (contentHost) contentHost.style.display = 'none';
+    if (original) original.style.display = 'none';
     if (gridButton) {
       gridButton.classList.add('tabmark-grid-tab--active');
     }
@@ -155,17 +165,17 @@ function init(): void {
     pendingInjectObserver = new MutationObserver(() => {
       const retryButton = injectGridButton(() => {
         const isVisible = panel.style.display !== 'none';
-        const contentHost = findFileContentContainer();
+        const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
         const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
         if (isVisible) {
           panel.style.display = 'none';
-          if (contentHost) contentHost.style.display = '';
+          if (original) original.style.display = '';
           if (gridButton) {
             gridButton.classList.remove('tabmark-grid-tab--active');
           }
           return;
         }
-        if (contentHost) contentHost.style.display = 'none';
+        if (original) original.style.display = 'none';
         if (gridButton) {
           gridButton.classList.add('tabmark-grid-tab--active');
         }

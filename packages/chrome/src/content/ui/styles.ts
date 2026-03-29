@@ -59,6 +59,10 @@ export function ensureStylesInjected(): void {
       font-weight: 600;
     }
 
+    .tabmark-grid-original {
+      display: block;
+    }
+
     .tabmark-grid-panel {
       border: 1px solid var(--borderColor-default, #d0d7de);
       border-radius: 6px;
