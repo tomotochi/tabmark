@@ -9,7 +9,7 @@ import {
   TABMARK_GRID_BUTTON_ID,
 } from './ui/injectTabs';
 import { ensureStylesInjected } from './ui/styles';
-import { findFileContentContainer } from './github/selectors';
+import { findFileContentContainer, findFlexRowContainer } from './github/selectors';
 
 const INJECT_MARKER_ATTR = 'data-tabmark-grid-injected';
 const TABMARK_GRID_ROOT_ID = 'tabmark-grid-root';
@@ -17,6 +17,7 @@ const TABMARK_GRID_PANEL_ID = 'tabmark-grid-panel';
 const TABMARK_GRID_STATUS_ID = 'tabmark-grid-status';
 const TABMARK_GRID_ORIGINAL_ID = 'tabmark-grid-original';
 const TABMARK_WRAPPED_ATTR = 'data-tabmark-grid-wrapped';
+const GRID_LAYOUT_ACTIVE_ATTR = 'data-tabmark-grid-layout-active';
 let pendingInjectObserver: MutationObserver | null = null;
 
 function shouldRunOnThisPage(): boolean {
@@ -51,6 +52,8 @@ function removeInjectedUi(): void {
     original.remove();
     contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
   }
+  // Clean up layout override attribute
+  document.documentElement.removeAttribute(GRID_LAYOUT_ACTIVE_ATTR);
   if (pendingInjectObserver) {
     pendingInjectObserver.disconnect();
     pendingInjectObserver = null;
@@ -102,6 +105,14 @@ function ensureRootContainer(): HTMLElement | null {
 async function showGrid(panel: HTMLElement): Promise<void> {
   panel.style.display = 'block';
 
+  // Compute the exact remaining viewport height from the panel's actual top position.
+  // This is more reliable than CSS calc() because it accounts for all surrounding
+  // layout elements (sticky header, breadcrumbs, tab bar, etc.).
+  const top = panel.getBoundingClientRect().top;
+  panel.style.setProperty('height', `${Math.max(200, window.innerHeight - top)}px`, 'important');
+  panel.style.setProperty('overflow', 'scroll', 'important');
+  panel.style.setProperty('max-height', 'none', 'important');
+
   const status = panel.querySelector<HTMLElement>(`#${TABMARK_GRID_STATUS_ID}`);
   if (status) {
     status.className = 'tabmark-grid-status';
@@ -140,18 +151,24 @@ function init(): void {
     const isVisible = panel.style.display !== 'none';
     const original = document.getElementById(TABMARK_GRID_ORIGINAL_ID);
     const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
+    const flexRow = findFlexRowContainer();
     if (isVisible) {
       panel.style.display = 'none';
+      panel.style.removeProperty('height');
+      panel.style.removeProperty('overflow');
+      panel.style.removeProperty('max-height');
       if (original) original.style.display = '';
       if (gridButton) {
         gridButton.classList.remove('tabmark-grid-tab--active');
       }
+      document.documentElement.removeAttribute(GRID_LAYOUT_ACTIVE_ATTR);
       return;
     }
     if (original) original.style.display = 'none';
     if (gridButton) {
       gridButton.classList.add('tabmark-grid-tab--active');
     }
+    document.documentElement.setAttribute(GRID_LAYOUT_ACTIVE_ATTR, 'true');
     void showGrid(panel);
   });
 

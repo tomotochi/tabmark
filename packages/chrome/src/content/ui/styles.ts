@@ -124,6 +124,13 @@ export function ensureStylesInjected(): void {
       color: var(--fgColor-danger, #cf222e);
       white-space: pre-wrap;
     }
+
+    /* When Tabmark grid is active, prevent the page from scrolling so only the
+       grid panel's own scrollbar is visible. Applied on <html> for reliability,
+       avoiding the need to size intermediate flex/block containers. */
+    html[data-tabmark-grid-layout-active] {
+      overflow: hidden !important;
+    }
   `.trim();
 
   document.head.appendChild(style);

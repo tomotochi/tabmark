@@ -79,9 +79,7 @@ export function findFileContentContainer(): HTMLElement | null {
   // 1. Markdown blob content element — most precise; confirmed on target page.
   //    We want to swap only the rendered markdown, not the surrounding layout.
   const byBlob =
-    document.querySelector<HTMLElement>('div.BlobContent-module__markdownBlob__T8jpG') ??
     document.querySelector<HTMLElement>('div[class*="BlobContent-module__markdownBlob"]') ??
-    document.querySelector<HTMLElement>('div.BlobViewContent-module__blobContentWrapper__JS0W6') ??
     document.querySelector<HTMLElement>('div[class*="BlobViewContent-module__blobContentWrapper"]');
   if (byBlob) return byBlob;
 
@@ -112,4 +110,16 @@ export function findFileContentContainer(): HTMLElement | null {
   const fileBox = findFileBoxContainer();
   if (!fileBox) return null;
   return fileBox.querySelector<HTMLElement>('.Box-body') ?? null;
+}
+
+/**
+ * Returns the flex-row container that wraps the file content area.
+ * This element is constrained to viewport height while the Tabmark grid is active
+ * to prevent a double-scrollbar UX issue.
+ * Using partial-match selectors only so the function survives GitHub class-name hash changes.
+ */
+export function findFlexRowContainer(): HTMLElement | null {
+  return document.querySelector<HTMLElement>(
+    'div[class*="CodeView-module__contentWrapper"] > div.d-flex.flex-row',
+  );
 }
