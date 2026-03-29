@@ -187,7 +187,6 @@ function init(): void {
     const contentHost = findFileContentContainer();
     const original = contentHost?.querySelector<HTMLElement>('.tabmark-grid-original');
     const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
-    const flexRow = findFlexRowContainer();
     if (isVisible) {
       panel.style.display = 'none';
       panel.style.removeProperty('height');
