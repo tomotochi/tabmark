@@ -6,6 +6,11 @@ export function ensureStylesInjected(): void {
   const style = document.createElement('style');
   style.id = TABMARK_STYLE_ELEMENT_ID;
   style.textContent = `
+    /* Hide the original content, but keep our root visible */
+    [data-tabmark-grid-wrapped="true"] > :not(#tabmark-grid-root) {
+      display: none !important;
+    }
+
     .tabmark-grid-root {
       margin-top: 0;
     }
@@ -57,10 +62,6 @@ export function ensureStylesInjected(): void {
     .tabmark-grid-tab.tabmark-grid-tab--active {
       background: var(--control-transparent-bgColor-active, rgba(208, 215, 222, 0.48));
       font-weight: 600;
-    }
-
-    .tabmark-grid-original {
-      display: block;
     }
 
     .tabmark-grid-panel {
