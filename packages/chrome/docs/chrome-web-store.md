@@ -27,12 +27,25 @@
 
 ---
 
-## 3. ビルドとZIP作成
+## 3. ビルド
 
 ```bash
 cd packages/chrome
 npm run build
 ```
+
+---
+
+## 4. ローカルでの動作確認
+
+- Chromeの拡張機能を開く `chrome://extensions`
+- デベロッパー モードをONにする
+- 「パッケージ化されていない拡張機能を読み込む」を押す
+- `packages/chrome` ディレクトリを指定する
+
+---
+
+## 5. ZIP作成
 
 ZIPに含めるもの:
 - `manifest.json`
@@ -47,7 +60,7 @@ zip -r tabmark-chrome.zip manifest.json dist icons
 
 ---
 
-## 4. Chrome Web Storeへのアップロード
+## 6. Chrome Web Storeへのアップロード
 
 - Developer Consoleで新規アイテムを作成
 - `tabmark-chrome.zip` をアップロード
@@ -55,7 +68,7 @@ zip -r tabmark-chrome.zip manifest.json dist icons
 
 ---
 
-## 5. ストア情報入力
+## 7. ストア情報入力
 
 - 拡張機能の概要・詳細説明
 - 対象URL（`https://github.com/*`）
@@ -65,7 +78,7 @@ zip -r tabmark-chrome.zip manifest.json dist icons
 
 ---
 
-## 6. 公開前チェック
+## 8. 公開前チェック
 
 - `host_permissions` の説明
   - GitHub / raw取得が必要な理由を明記
@@ -76,7 +89,7 @@ zip -r tabmark-chrome.zip manifest.json dist icons
 
 ---
 
-## 7. 提出・審査
+## 9. 提出・審査
 
 - 提出して審査待ち
 - 指摘が来た場合:
