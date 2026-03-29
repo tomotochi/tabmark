@@ -6,11 +6,6 @@ export function ensureStylesInjected(): void {
   const style = document.createElement('style');
   style.id = TABMARK_STYLE_ELEMENT_ID;
   style.textContent = `
-    /* Hide the original content, but keep our root visible */
-    [data-tabmark-grid-wrapped="true"] > :not(#tabmark-grid-root) {
-      display: none !important;
-    }
-
     .tabmark-grid-root {
       margin-top: 0;
     }

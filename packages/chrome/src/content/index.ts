@@ -43,6 +43,7 @@ function removeInjectedUi(): void {
   document.getElementById(TABMARK_GRID_ROOT_ID)?.remove();
   const contentHost = findFileContentContainer();
   if (contentHost) {
+    contentHost.style.display = '';
     contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
   }
   if (pendingInjectObserver) {
@@ -59,7 +60,11 @@ function ensureRootContainer(): HTMLElement | null {
 
   // Prefer replacing the main file content area (Preview/Code) with our panel.
   const contentHost = findFileContentContainer();
-  if (!contentHost) return null;
+  if (!contentHost || !contentHost.parentNode) return null;
+
+  if (!contentHost.hasAttribute(TABMARK_WRAPPED_ATTR)) {
+    contentHost.setAttribute(TABMARK_WRAPPED_ATTR, 'true');
+  }
 
   const root = document.createElement('div');
   root.id = TABMARK_GRID_ROOT_ID;
@@ -78,8 +83,8 @@ function ensureRootContainer(): HTMLElement | null {
   panel.appendChild(status);
   root.appendChild(panel);
 
-  // Append as a child of contentHost instead of sibling
-  contentHost.appendChild(root);
+  // Insert the root sibling to contentHost
+  contentHost.parentNode.insertBefore(root, contentHost.nextSibling);
 
   return root;
 }
@@ -127,13 +132,13 @@ function init(): void {
     const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
     if (isVisible) {
       panel.style.display = 'none';
-      if (contentHost) contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
+      if (contentHost) contentHost.style.display = '';
       if (gridButton) {
         gridButton.classList.remove('tabmark-grid-tab--active');
       }
       return;
     }
-    if (contentHost) contentHost.setAttribute(TABMARK_WRAPPED_ATTR, 'true');
+    if (contentHost) contentHost.style.display = 'none';
     if (gridButton) {
       gridButton.classList.add('tabmark-grid-tab--active');
     }
@@ -154,13 +159,13 @@ function init(): void {
         const gridButton = document.getElementById(TABMARK_GRID_BUTTON_ID);
         if (isVisible) {
           panel.style.display = 'none';
-          if (contentHost) contentHost.removeAttribute(TABMARK_WRAPPED_ATTR);
+          if (contentHost) contentHost.style.display = '';
           if (gridButton) {
             gridButton.classList.remove('tabmark-grid-tab--active');
           }
           return;
         }
-        if (contentHost) contentHost.setAttribute(TABMARK_WRAPPED_ATTR, 'true');
+        if (contentHost) contentHost.style.display = 'none';
         if (gridButton) {
           gridButton.classList.add('tabmark-grid-tab--active');
         }
