@@ -46,6 +46,7 @@ export function injectGridButton(onClick: () => void): HTMLElement | null {
     btn.id = TABMARK_GRID_BUTTON_ID;
     btn.type = 'button';
     btn.className = 'btn btn-sm tabmark-grid-button';
+    btn.setAttribute('aria-current', 'false');
     btn.textContent = 'Grid';
     injectGridIcon(btn);
     btn.addEventListener('click', (e) => {

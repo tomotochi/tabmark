@@ -75,35 +75,48 @@ export function findFileModeTabsContainer(): HTMLElement | null {
   return null;
 }
 
+/**
+ * Returns the first matching element that is actually visible (not hidden by GitHub's SPA cache).
+ */
+function queryVisible<T extends HTMLElement>(selectors: string[]): T | null {
+  for (const selector of selectors) {
+    const elements = document.querySelectorAll<T>(selector);
+    for (const el of Array.from(elements)) {
+      if (el.getBoundingClientRect().height > 0 || el.getBoundingClientRect().width > 0) {
+        return el;
+      }
+    }
+  }
+  return null;
+}
+
 export function findFileContentContainer(): HTMLElement | null {
   // 1. Markdown blob content element — most precise; confirmed on target page.
   //    We want to swap only the rendered markdown, not the surrounding layout.
-  const byBlob =
-    document.querySelector<HTMLElement>('div[class*="BlobContent-module__markdownBlob"]') ??
-    document.querySelector<HTMLElement>('div[class*="BlobViewContent-module__blobContentWrapper"]');
+  const byBlob = queryVisible<HTMLElement>([
+    'div[class*="BlobContent-module__markdownBlob"]',
+    'div[class*="BlobViewContent-module__blobContentWrapper"]'
+  ]);
   if (byBlob) return byBlob;
 
   // 2. Stable test-id selectors (version-agnostic)
-  const byTestId =
-    document.querySelector<HTMLElement>('[data-testid="blob-content"]') ??
-    document.querySelector<HTMLElement>('[data-testid="file-view-content"]') ??
-    document.querySelector<HTMLElement>('[data-testid="file-blob"]');
+  const byTestId = queryVisible<HTMLElement>([
+    '[data-testid="blob-content"]',
+    '[data-testid="file-view-content"]',
+    '[data-testid="file-blob"]'
+  ]);
   if (byTestId) return byTestId;
 
   // 3. Current GitHub React UI layout class (prc-* prefix) — broad fallback
-  const byPrc = document.querySelector<HTMLElement>(
-    'div.prc-PageLayout-ContentWrapper-gR9eG',
-  );
+  const byPrc = queryVisible<HTMLElement>(['div.prc-PageLayout-ContentWrapper-gR9eG']);
   if (byPrc) return byPrc;
 
   // 4. react-app semantic elements
-  const bySemantics =
-    document.querySelector<HTMLElement>('react-app article') ??
-    document.querySelector<HTMLElement>('react-app section');
+  const bySemantics = queryVisible<HTMLElement>(['react-app article', 'react-app section']);
   if (bySemantics) return bySemantics;
 
   // 5. Legacy Primer CSS class
-  const byLegacy = document.querySelector<HTMLElement>('.blob-wrapper');
+  const byLegacy = queryVisible<HTMLElement>(['.blob-wrapper']);
   if (byLegacy) return byLegacy;
 
   // 6. Walk up from the Raw anchor — last resort
@@ -119,7 +132,7 @@ export function findFileContentContainer(): HTMLElement | null {
  * Using partial-match selectors only so the function survives GitHub class-name hash changes.
  */
 export function findFlexRowContainer(): HTMLElement | null {
-  return document.querySelector<HTMLElement>(
-    'div[class*="CodeView-module__contentWrapper"] > div.d-flex.flex-row',
-  );
+  return queryVisible<HTMLElement>([
+    'div[class*="CodeView-module__contentWrapper"] > div.d-flex.flex-row'
+  ]);
 }

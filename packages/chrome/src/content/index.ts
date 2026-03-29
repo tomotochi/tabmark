@@ -166,6 +166,7 @@ function init(): void {
       if (original) original.style.display = '';
       if (gridButton) {
         gridButton.classList.remove('tabmark-grid-tab--active');
+        gridButton.setAttribute('aria-current', 'false');
       }
       document.documentElement.removeAttribute(GRID_LAYOUT_ACTIVE_ATTR);
       return;
@@ -173,6 +174,7 @@ function init(): void {
     if (original) original.style.display = 'none';
     if (gridButton) {
       gridButton.classList.add('tabmark-grid-tab--active');
+      gridButton.setAttribute('aria-current', 'true');
     }
     document.documentElement.setAttribute(GRID_LAYOUT_ACTIVE_ATTR, 'true');
     void showGrid(panel);
