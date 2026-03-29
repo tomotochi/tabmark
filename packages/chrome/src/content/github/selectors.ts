@@ -76,34 +76,40 @@ export function findFileModeTabsContainer(): HTMLElement | null {
 }
 
 export function findFileContentContainer(): HTMLElement | null {
-  // 1. Stable test-id selectors (preferred, version-agnostic)
+  // 1. Markdown blob content element — most precise; confirmed on target page.
+  //    We want to swap only the rendered markdown, not the surrounding layout.
+  const byBlob =
+    document.querySelector<HTMLElement>('div.BlobContent-module__markdownBlob__T8jpG') ??
+    document.querySelector<HTMLElement>('div[class*="BlobContent-module__markdownBlob"]') ??
+    document.querySelector<HTMLElement>('div.BlobViewContent-module__blobContentWrapper__JS0W6') ??
+    document.querySelector<HTMLElement>('div[class*="BlobViewContent-module__blobContentWrapper"]');
+  if (byBlob) return byBlob;
+
+  // 2. Stable test-id selectors (version-agnostic)
   const byTestId =
     document.querySelector<HTMLElement>('[data-testid="blob-content"]') ??
     document.querySelector<HTMLElement>('[data-testid="file-view-content"]') ??
     document.querySelector<HTMLElement>('[data-testid="file-blob"]');
   if (byTestId) return byTestId;
 
-  // 2. Current GitHub React UI layout class (prc-* prefix)
+  // 3. Current GitHub React UI layout class (prc-* prefix) — broad fallback
   const byPrc = document.querySelector<HTMLElement>(
     'div.prc-PageLayout-ContentWrapper-gR9eG',
   );
   if (byPrc) return byPrc;
 
-  // 3. react-app semantic elements
+  // 4. react-app semantic elements
   const bySemantics =
     document.querySelector<HTMLElement>('react-app article') ??
     document.querySelector<HTMLElement>('react-app section');
   if (bySemantics) return bySemantics;
 
-  // 4. Legacy Primer CSS class
+  // 5. Legacy Primer CSS class
   const byLegacy = document.querySelector<HTMLElement>('.blob-wrapper');
   if (byLegacy) return byLegacy;
 
-  // 5. Walk up from the Raw anchor — last resort
+  // 6. Walk up from the Raw anchor — last resort
   const fileBox = findFileBoxContainer();
   if (!fileBox) return null;
-  return (
-    fileBox.querySelector<HTMLElement>('.Box-body') ??
-    null
-  );
+  return fileBox.querySelector<HTMLElement>('.Box-body') ?? null;
 }
