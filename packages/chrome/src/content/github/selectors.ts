@@ -153,38 +153,50 @@ export function findFileContentContainer(): HTMLElement | null {
     ]);
   if (byTestId) return byTestId;
 
-  // 3. Current GitHub React UI layout class (prc-* prefix) — broad fallback
-  const byPrc =
-    queryVisible<HTMLElement>(['div.prc-PageLayout-ContentWrapper-gR9eG']) ??
-    queryAny<HTMLElement>(['div.prc-PageLayout-ContentWrapper-gR9eG']);
-  if (byPrc) return byPrc;
+  // 3. Broad layout fallback (GitHub React UI). Avoid hard-coding hashed class names
+  //    and instead match on the semantic part of the layout class.
+  const byLayout =
+    queryVisible<HTMLElement>([
+      'div[class*="PageLayout-ContentWrapper"]',
+      'main div[class*="Layout-main"]'
+    ]) ?? queryAny<HTMLElement>([
+      'div[class*="PageLayout-ContentWrapper"]',
+      'main div[class*="Layout-main"]'
+    ]);
+  if (byLayout) {
+    debugLog('findFileContentContainer(): using layout wrapper fallback.');
+    return byLayout;
+  }
 
   // 4. react-app semantic elements
   const bySemantics =
     queryVisible<HTMLElement>(['react-app article', 'react-app section']) ??
     queryAny<HTMLElement>(['react-app article', 'react-app section']);
-  if (bySemantics) return bySemantics;
+  if (bySemantics) {
+    debugLog('findFileContentContainer(): using react-app semantic element.');
+    return bySemantics;
+  }
 
   // 5. Legacy Primer CSS class
   const byLegacy =
     queryVisible<HTMLElement>(['.blob-wrapper']) ??
     queryAny<HTMLElement>(['.blob-wrapper']);
-  if (byLegacy) return byLegacy;
+  if (byLegacy) {
+    debugLog('findFileContentContainer(): using legacy .blob-wrapper.');
+    return byLegacy;
+  }
 
   // 6. Walk up from the Raw anchor — last resort
   const fileBox = findFileBoxContainer();
-  if (!fileBox) return null;
-  return fileBox.querySelector<HTMLElement>('.Box-body') ?? null;
-}
-
-/**
- * Returns the flex-row container that wraps the file content area.
- * This element is constrained to viewport height while the Tabmark grid is active
- * to prevent a double-scrollbar UX issue.
- * Using partial-match selectors only so the function survives GitHub class-name hash changes.
- */
-export function findFlexRowContainer(): HTMLElement | null {
-  return queryVisible<HTMLElement>([
-    'div[class*="CodeView-module__contentWrapper"] > div.d-flex.flex-row'
-  ]);
+  if (!fileBox) {
+    debugLog('findFileContentContainer(): no fileBox found from Raw button.');
+    return null;
+  }
+  const boxBody = fileBox.querySelector<HTMLElement>('.Box-body') ?? null;
+  if (boxBody) {
+    debugLog('findFileContentContainer(): using .Box-body fallback from fileBox.');
+  } else {
+    debugLog('findFileContentContainer(): fileBox present but .Box-body not found.');
+  }
+  return boxBody;
 }

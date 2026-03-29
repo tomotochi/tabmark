@@ -10,7 +10,7 @@ import {
   TABMARK_GRID_BUTTON_ID,
 } from './ui/injectTabs';
 import { ensureStylesInjected } from './ui/styles';
-import { findFileContentContainer, findFlexRowContainer } from './github/selectors';
+import { findFileContentContainer } from './github/selectors';
 
 const INJECT_MARKER_ATTR = 'data-tabmark-grid-injected';
 const TABMARK_GRID_ROOT_ID = 'tabmark-grid-root';
