@@ -157,6 +157,21 @@ function init(): void {
 
   if (button) {
     markInjected();
+    // Watch for GitHub layout re-renders (e.g. Outline pane auto-closing) that
+    // may destroy the injected button, and re-inject it if that happens.
+    if (!pendingInjectObserver) {
+      const watchRoot =
+        document.querySelector<HTMLElement>('#repos-sticky-header') ??
+        document.documentElement;
+      pendingInjectObserver = new MutationObserver(() => {
+        if (!document.getElementById(TABMARK_GRID_BUTTON_ID)) {
+          pendingInjectObserver?.disconnect();
+          pendingInjectObserver = null;
+          init();
+        }
+      });
+      pendingInjectObserver.observe(watchRoot, { childList: true, subtree: true });
+    }
     return;
   }
 

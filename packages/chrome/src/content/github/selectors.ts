@@ -76,17 +76,34 @@ export function findFileModeTabsContainer(): HTMLElement | null {
 }
 
 export function findFileContentContainer(): HTMLElement | null {
-  const hardCoded = document.querySelector<HTMLElement>(
-    '#repo-content-pjax-container > react-app > div > div > div.prc-PageLayout-PageLayoutRoot--KH-d > div > div > div.prc-PageLayout-ContentWrapper-gR9eG > div > div > div:nth-child(3) > div.Box-sc-62in7e-0.hGzGyY > div > div.Box-sc-62in7e-0.dIDnLY > section > div',
-  );
-  if (hardCoded) return hardCoded;
+  // 1. Stable test-id selectors (preferred, version-agnostic)
+  const byTestId =
+    document.querySelector<HTMLElement>('[data-testid="blob-content"]') ??
+    document.querySelector<HTMLElement>('[data-testid="file-view-content"]') ??
+    document.querySelector<HTMLElement>('[data-testid="file-blob"]');
+  if (byTestId) return byTestId;
 
+  // 2. Current GitHub React UI layout class (prc-* prefix)
+  const byPrc = document.querySelector<HTMLElement>(
+    'div.prc-PageLayout-ContentWrapper-gR9eG',
+  );
+  if (byPrc) return byPrc;
+
+  // 3. react-app semantic elements
+  const bySemantics =
+    document.querySelector<HTMLElement>('react-app article') ??
+    document.querySelector<HTMLElement>('react-app section');
+  if (bySemantics) return bySemantics;
+
+  // 4. Legacy Primer CSS class
+  const byLegacy = document.querySelector<HTMLElement>('.blob-wrapper');
+  if (byLegacy) return byLegacy;
+
+  // 5. Walk up from the Raw anchor — last resort
   const fileBox = findFileBoxContainer();
   if (!fileBox) return null;
-
   return (
     fileBox.querySelector<HTMLElement>('.Box-body') ??
-    fileBox.querySelector<HTMLElement>('[data-testid="file-view-content"]') ??
     null
   );
 }
