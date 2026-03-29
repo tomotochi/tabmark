@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tabmark Grid for GitHub",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPWjWsex7lPGwDG9HZcidhQ439UT1zG97kgYAJ/FTkpv5wUePUsyX2jpBddks7bFtbrUS4ju1vp7cHUIONezC1vBhK8GHBnCohcJUnmG4Zkxh7i/Kpb55AJSojx/gKRF5LepH4km3tlsR1taeTMSJbssv8A7UCM/NfrkNdYSZy66po8qMsV3NmJON4yzVU2ojJQdUjTN6JJz9ZTLRwKMC6YSjvo2USgWjB5U5zE/rF1UHGhczX0sKIogZGnKLh6pzyPl7wUwbfpRNshuIkd68yfjaLO9MVWSITiBORZgZfKacoLQoSG1QXdp2Oy2CYHFhtAxe/+WnGKl9TCYCmvH4wIDAQAB",
   "description": "Adds a read-only Grid view for Tabmark (*.table.md) files on GitHub.",
   "content_scripts": [

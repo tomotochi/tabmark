@@ -55,7 +55,7 @@ ZIPに含めるもの:
 ZIP作成例:
 ```bash
 cd packages/chrome
-zip -r tabmark-chrome.zip manifest.json dist icons
+zip -r tabmark-chrome.zip manifest.json dist assets
 ```
 
 ---
