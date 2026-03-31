@@ -14,8 +14,9 @@
 
 ### アイコン
 - 128x128 (必須)
-- 16x16 / 48x48 (推奨)
-- 配置例: `packages/chrome/icons/`
+- 16x16 / 32x32 / 48x48 (推奨)
+- 配置例: `packages/chrome/assets/`（`tabmark-icon-16.png` / `32` / `48` / `128`）
+- ツールバーアイコンは `action.default_icon` で 16px（標準）/ 32px（高DPI）を指定
 
 ### スクリーンショット
 - GitHubの `*.table.md` ファイル表示画面で **Gridボタンが出ている状態**
@@ -50,7 +51,7 @@ npm run build
 ZIPに含めるもの:
 - `manifest.json`
 - `dist/content.js`
-- `icons/*`（必須アセットがある場合）
+- `assets/*`（`manifest.json` の `icons` と `web_accessible_resources` で参照する PNG / SVG）
 
 ZIP作成例:
 ```bash
